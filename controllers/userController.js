@@ -60,6 +60,55 @@ class UserController {
     }
     // ^---------------------------------------------------------------------------------------------------------
 
+    static userLogin = async (req, res) => {
+        try {
+            const { email, password } = req.body;
+
+            // Check if email and password are provided
+            if (email && password) {
+                const user = await UserModel.findOne({ email: email });
+
+                // Check if user exists
+                if (user != null) {
+                    const isMatch = await bcrypt.compare(password, user.password);
+
+                    // Check if email and password match
+                    if (isMatch) {
+                        //^ Generate JWT Token
+                        const token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '5d' });
+
+                        // //^ Send token as an HttpOnly cookie
+                        res.cookie('token', token, {
+                            httpOnly: true,   // This flag makes the cookie inaccessible to JavaScript
+                            secure: process.env.NODE_ENV === 'production' || "dev", // Secure flag for HTTPS in production
+                            sameSite: 'strict',  // Helps prevent CSRF attacks or `Lax`
+                            maxAge: 5 * 24 * 60 * 60 * 1000 // Token expires in 5 days
+                        })
+                        
+                        res.status(200).send({ "status": "success", "message": "Login Success"});
+                    } else {
+                        // Incorrect email or password
+                        res.status(401).send({ "status": "failed", "message": "Email or Password is not Valid" });
+                    }
+                } else {
+                    // User not found
+                    res.status(404).send({ "status": "failed", "message": "You are not a Registered User" });
+                }
+            } else {
+                // Missing fields
+                res.status(400).send({ "status": "failed", "message": "All Fields are Required" });
+            }
+        } catch (error) {
+            console.log(error);
+            // Server error
+            res.status(500).send({ "status": "failed", "message": "Unable to Login" });
+        }
+    };
+
+
+    // ^---------------------------------------------------------------------------------------------------------
+
+
 }
 
 export default UserController
