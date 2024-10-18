@@ -8,6 +8,7 @@ import UserController from '../controllers/userController.js';
 // Public Routes
 router.post('/register', UserController.userRegistration)
 router.post('/login', UserController.userLogin)
+router.post('/send-reset-password-email', UserController.sendUserPasswordResetEmail)
 
 // Protected Routes
 
