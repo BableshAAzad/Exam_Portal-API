@@ -1,6 +1,7 @@
 import UserModel from '../models/user.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import transporter from '../config/emailConfig.js'
 
 class UserController {
     // ^---------------------------------------------------------------------------------------------------------
@@ -138,13 +139,13 @@ class UserController {
                 const token = jwt.sign({ userID: user._id }, secret, { expiresIn: '15m' })
                 const link = `http://127.0.0.1:3000/api/user/reset/${user._id}/${token}`
                 console.log(link)
-                // // Send Email
-                // let info = await transporter.sendMail({
-                //   from: process.env.EMAIL_FROM,
-                //   to: user.email,
-                //   subject: "GeekShop - Password Reset Link",
-                //   html: `<a href=${link}>Click Here</a> to Reset Your Password`
-                // })
+                //& Send Email
+                let info = await transporter.sendMail({
+                  from: process.env.EMAIL_FROM,
+                  to: user.email,
+                  subject: "Exam Portal - Password Reset Link",
+                  html: `<a href=${link}>Click Here</a> to Reset Your Password`
+                })
                 res.send({ "status": "success", "message": "Password Reset Email Sent... Please Check Your Email" })
             } else {
                 res.send({ "status": "failed", "message": "Email doesn't exists" })
